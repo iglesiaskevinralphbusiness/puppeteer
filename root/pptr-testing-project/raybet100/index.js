@@ -86,7 +86,7 @@ describe('Test puppeteer', () => {
                     live: matchLive,
                     game_time: matchTime,
                     game_date: matchDate,
-                    game_logo: matchInfo.querySelector('.match-title span:first-child').getAttribute('style'),
+                    game_logo: matchInfo.querySelector('.match-title span:first-child').getAttribute('style').replace('background-image: url("//','').replace('");',''),
                     scoreline: [homeTeamScore, awayTeamScore],
                     team: [
                         {
@@ -106,24 +106,64 @@ describe('Test puppeteer', () => {
             //get event maps
             const maps = await page.$$('.stage-list')
             let event_markets = [];
+            let i = 0;
             for (const map of maps) {
-                const map_details = await page.evaluate(() => {
-                    //condition if live or not
-                    let mapTitle = document.querySelector('.stage-title')
-                    if ( mapTitle !== null) mapTitle = mapTitle.textContent.trim
-                    else mapTitle = 'Final'
+                const map_details = await page.evaluate((i) => {
+                    const stage_list = document.querySelectorAll('.stage-list')[i];
+
+                    //get map name
+                    let mapName = stage_list.querySelector('.stage-title')
+                    if ( mapName !== null) mapName = mapName.textContent.trim()
+                    else mapName = 'FINAL'
+
+                    const markets = Array.from(stage_list.querySelectorAll('.group-list > section'));
+                    const markets_items = markets.map(market => {
+
+                        //get markets
+                        marketName = market.querySelector('div')
+                        if ( marketName !== null) marketName = marketName.textContent.trim()
+                        else marketName = ''
+
+                        homeOddsTitle = market.querySelector('.odds-name.left-name')
+                        homeOddsValue = market.querySelector('.left-contain .bet-odds')
+                        homeOddsResult = market.querySelector('.left-contain .result-icon')
+                        awayOddsTitle = market.querySelector('.odds-name.right-name')
+                        awayOddsValue = market.querySelector('.right-contain .bet-odds')
+                        homeOddsResult = market.querySelector('.right-contain .result-icon')
+
+                        if ( homeOddsTitle !== null) homeOddsTitle = homeOddsTitle.textContent.trim()
+                        else homeOddsTitle = ''
+
+                        if ( homeOddsValue !== null) homeOddsValue = homeOddsValue.textContent.trim()
+                        else if (homeOddsResult !== null && homeOddsResult.classList.contains('match-win')) homeOddsValue = 'Win'
+                        else if (homeOddsResult !== null && homeOddsResult.classList.contains('match-lose')) homeOddsValue = 'Lose'
+                        else homeOddsValue = 'Locked'
+
+                        if ( awayOddsTitle !== null) awayOddsTitle = awayOddsTitle.textContent.trim()
+                        else awayOddsTitle = ''
+                        
+                        if ( awayOddsValue !== null) awayOddsValue = awayOddsValue.textContent.trim()
+                        else if (awayOddsValue !== null && awayOddsValue.classList.contains('match-win')) awayOddsValue = 'Win'
+                        else if (awayOddsValue !== null && awayOddsValue.classList.contains('match-lose')) awayOddsValue = 'Lose'
+                        else awayOddsValue = 'Locked'
+
+                        return {
+                            market_name: marketName,
+                            home: [ homeOddsTitle, homeOddsValue ],
+                            away: [ awayOddsTitle, awayOddsValue ],
+                        }
+                    });
 
                     return {
-                        map: mapTitle,
+                        map: mapName,
+                        martkets: markets_items
                     }
-
-                })
+                },i)
+                i++
                 event_markets.push(map_details)
-
-
-                //console.log(map_details);
             }
 
+            //console.log(JSON.stringify(event_markets))
         
 
             //build event object
@@ -139,7 +179,8 @@ describe('Test puppeteer', () => {
             });
         }
 
-        console.log(results);
+        console.log(JSON.stringify(results))
+        //console.log(results);
     })
 
 });
