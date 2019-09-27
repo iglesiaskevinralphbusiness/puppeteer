@@ -1,0 +1,18 @@
+{
+  "name": "pptr-testing-project",
+  "version": "1.0.0",
+  "description": "automated testing",
+  "main": "index.js",
+  "scripts": {
+    "test": "node ./node_modules/mocha/bin/mocha --timeout=30000 ./raybet100/index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "chai": "^4.2.0",
+    "jest": "^24.9.0",
+    "jest-image-snapshot": "^2.11.0",
+    "mocha": "^6.2.0",
+    "puppeteer": "^1.20.0"
+  }
+}
