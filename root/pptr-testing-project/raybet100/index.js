@@ -117,7 +117,11 @@ describe('Test puppeteer', () => {
                     else mapName = 'FINAL'
 
                     const markets = Array.from(stage_list.querySelectorAll('.group-list > section'));
-                    const markets_items = markets.map(market => {
+                    const markets_items = markets.filter(market => {
+                        marketName = market.querySelector('div')
+                        if ( marketName !== null) return true
+                        else return false
+                    }).map(market => {
 
                         //get markets
                         marketName = market.querySelector('div')
@@ -127,6 +131,7 @@ describe('Test puppeteer', () => {
                         homeOddsTitle = market.querySelector('.odds-name.left-name')
                         homeOddsValue = market.querySelector('.left-contain .bet-odds')
                         homeOddsResult = market.querySelector('.left-contain .result-icon')
+                        
                         awayOddsTitle = market.querySelector('.odds-name.right-name')
                         awayOddsValue = market.querySelector('.right-contain .bet-odds')
                         homeOddsResult = market.querySelector('.right-contain .result-icon')
@@ -143,14 +148,19 @@ describe('Test puppeteer', () => {
                         else awayOddsTitle = ''
                         
                         if ( awayOddsValue !== null) awayOddsValue = awayOddsValue.textContent.trim()
-                        else if (awayOddsValue !== null && awayOddsValue.classList.contains('match-win')) awayOddsValue = 'Win'
-                        else if (awayOddsValue !== null && awayOddsValue.classList.contains('match-lose')) awayOddsValue = 'Lose'
+                        else if (homeOddsResult !== null && homeOddsResult.classList.contains('match-win')) awayOddsValue = 'Win'
+                        else if (homeOddsResult !== null && homeOddsResult.classList.contains('match-lose')) awayOddsValue = 'Lose'
                         else awayOddsValue = 'Locked'
 
-                        return {
-                            market_name: marketName,
-                            home: [ homeOddsTitle, homeOddsValue ],
-                            away: [ awayOddsTitle, awayOddsValue ],
+                        if(marketName !== ''){
+                            return {
+                                market_name: marketName,
+                                home: [ homeOddsTitle, homeOddsValue ],
+                                away: [ awayOddsTitle, awayOddsValue ],
+                            }
+                        }
+                        else {
+                            return false
                         }
                     });
 
